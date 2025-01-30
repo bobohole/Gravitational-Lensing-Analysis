@@ -1,0 +1,33 @@
+numpy as np
+import matplotlib.pyplot as plt
+from astropy.constants import G, c
+from scipy.optimize import curve_fit
+
+# Simulated lensing data (time delays in days)
+time_delays = np.array([120, 140, 160, 180, 200])  # Example delays for different quasars
+distance_lens = np.array([500, 600, 700, 800, 900])  # Mpc
+
+# Define modified lensing equation incorporating g
+def time_delay_g(D_lens, g, M_lens=1e12):
+    """
+    Computes time delay based on lensing with cosmic resistance g.
+    """
+    return (1 + g) * (4 * G.value * M_lens / (c.value**3)) * D_lens
+
+# Fit data to model
+popt, pcov = curve_fit(time_delay_g, distance_lens, time_delays)
+
+# Extract best-fit g value
+g_fit = popt[0]
+print(f"Estimated cosmic resistance parameter g: {g_fit:.4e}")
+
+# Plot results
+plt.figure(figsize=(8,5))
+plt.scatter(distance_lens, time_delays, label="Observed Data", color='blue')
+plt.plot(distance_lens, time_delay_g(distance_lens, g_fit), label=f"Fit with g={g_fit:.2e}", color='red')
+plt.xlabel("Lens Distance (Mpc)")
+plt.ylabel("Time Delay (days)")
+plt.title("Effect of Cosmic Resistance g on Gravitational Lensing Time Delay")
+plt.legend()
+plt.grid()
+plt.show()
